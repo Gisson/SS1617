@@ -2,11 +2,11 @@ import sys
 from collections import namedtuple
 import re
 
+DIVIDER=","
+
 def divide_and_conquer(string,division):
-	matchObj = re.match(r'((.*),(.*))*',string)
-	
-	for c in matchObj.group():
-		print(c)
+	divided = string.split(division) 
+	return divided
 
 
 def readConfig(fileName):
@@ -18,11 +18,12 @@ def readConfig(fileName):
 		text=f.readline()
 		while(text != ""):
 			if(text == "\n"):
-				rules+=[rule( name=ruletemp[0], entry_point=ruletemp[1], validation=ruletemp[2], sink=ruletemp[3]),]
+				rules+=[rule( name=ruletemp[0].strip(), entry_point=ruletemp[1].strip().split(DIVIDER), validation=ruletemp[2].strip().split(DIVIDER), sink=ruletemp[3].strip().split(DIVIDER)),]
 				ruletemp=[]
+				text=f.readline()
 			ruletemp+=[text,]
 			text=f.readline()
-		rules+=[rule( name=ruletemp[0], entry_point=ruletemp[1], validation=ruletemp[2], sink=ruletemp[3]),]
+		rules+=[rule( name=ruletemp[0].strip(), entry_point=ruletemp[1].strip().split(DIVIDER), validation=ruletemp[2].strip().split(DIVIDER), sink=ruletemp[3].strip().split(DIVIDER)),]
 		f.close()
 	except IOError:
 		print("File not found!!!!")
