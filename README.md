@@ -17,7 +17,7 @@ A static analysis tool written in Python for identifying data flow integrity vio
     ```bash
     pip install ply
     ```
-    Make sure it's installed for the correct python version.
+    Make sure it's installed for the correct python version. To do run the command `pip show ply` and check the Location field.
 
 ## Data structures
 
