@@ -1,0 +1,9 @@
+     SQL injection
+     $_GET,$_POST,$_COOKIE
+     mysql_escape_string,mysql_real_escape_string,mysql_real_escape_string
+     mysql_query,mysql_unbuffered_query,mysql_db_query
+
+     SQL injection
+     $_GET,$_POST,$_COOKIE
+     pg_escape_string,pg_escape_bytea
+     pg_query,pg_send_query
