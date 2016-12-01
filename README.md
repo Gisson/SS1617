@@ -4,13 +4,6 @@ A static analysis tool written in Python for identifying data flow integrity vio
 
 ## Dependencies
 
-- [PLY](http://www.dabeaz.com/ply/) (Python Lex-Yacc):
-
-  ```bash
-  pip install ply
-  ```
-  Make sure it's installed for the correct python version.
-  
 - [phply](https://github.com/viraptor/phply) (Python PHP parser)
 
   ```bash
@@ -18,3 +11,10 @@ A static analysis tool written in Python for identifying data flow integrity vio
   export PYTHONPATH="$PYTHONPATH:$(pwd)/phply"
   ```
 
+
+  - [PLY](http://www.dabeaz.com/ply/) (Python Lex-Yacc) (needed by `phply`):
+
+    ```bash
+    pip install ply
+    ```
+    Make sure it's installed for the correct python version.
