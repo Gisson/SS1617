@@ -131,7 +131,7 @@ class Analyser:
             logging.debug('testing Echo')
             return self.analyse(node.nodes)
 
-        print("Not implemented: analyseNode " + str(type(node)))
+        print("Not implemented: analyseNode " + str(type(node))+" in line " + str(node.lineno))
         return False
 
     def setTainted(self, node, tainted):
@@ -139,14 +139,14 @@ class Analyser:
             name = str(node.name)
             self.lstTaintedEntry['Variable'][name] = tainted;
         else:
-            print("Not implemented: setTainted " + str(type(node)))
+            print("Not implemented: setTainted " + str(type(node))+" in line " + str(node.lineno))
 
     def isTainted(self, node):
         if isinstance(node, Variable):
             name = str(node.name)
             return self.lstTaintedEntry['Variable'][name]
         else:
-            print("Not implemented: isTainted " + str(type(node)))
+            print("Not implemented: isTainted " + str(type(node))+" in line " + str(node.lineno))
 
 
 
