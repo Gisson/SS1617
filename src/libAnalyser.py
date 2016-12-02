@@ -10,19 +10,6 @@ def enableDebug():
 
 class Analyser:
 
-    # list of tainted entry points
-    # lstTaintedEntry[nodetype][nodeId][]
-    lstTaintedEntry = {'Variable': {}, 'Function': {}}
-
-
-    # list of tainted sinks
-    lstTaintedSinkLines = []
-
-    # list of sanitized sinks
-    lstSanitizedSinkLines = []
-
-    hasRun = False
-
     """ returns the line numbers of found sink functions that are tainted """
     def getTaintedSinkLines(self):
         if not self.hasRun:
@@ -41,6 +28,16 @@ class Analyser:
         self.lstEntries   = lstEntries
         self.lstValidator = lstValidator
         self.lstSinks     = lstSinks
+
+
+        # list of tainted entry points
+        # lstTaintedEntry[nodetype][nodeId][]
+        self.lstTaintedEntry = {'Variable': {}, 'Function': {}}
+        # list of tainted sinks
+        self.lstTaintedSinkLines = []
+        # list of sanitized sinks
+        self.lstSanitizedSinkLines = []
+        self.hasRun = False
 
     # retuns true if the node has information coming from a tainted source
     def analyse(self, node):
@@ -74,7 +71,9 @@ class Analyser:
             logging.debug('testing Variable: ' + name)
             try:
                 tainted = self.isTainted(node)
+                logging.debug('already known: ' + name)
             except KeyError:
+                logging.debug('not known: ' + name)
                 tainted = (name in self.lstEntries)
                 self.setTainted(node, tainted)
             logging.debug('testing Variable: ' + name + ': ' + str(tainted))
@@ -103,6 +102,12 @@ class Analyser:
             t2 = self.analyse(node.right)
             # TODO: add it to the list of tainted nodes? etc
             return t1 or t2
+
+        if isinstance(node, UnaryOp):
+            logging.debug('testing UnaryOp')
+            t1 = self.analyse(node.expr)
+            # TODO: add it to the list of tainted nodes? etc
+            return t1
 
         if isinstance(node, FunctionCall):
             logging.debug('testing FunctionCall')
@@ -135,15 +140,31 @@ class Analyser:
                                             'Throw', 'Declare', 'Directive', 'Else', ]:
                 logging.debug('testing ' + node.__class__.__name__)
                 return self.analyse(node.node)
-
-        if isinstance(node, Echo):
-            logging.debug('testing Echo')
-            t = self.analyse(node.nodes)
-            if "echo" in self.lstSinks and t:
-                print("FOUND TAINTED SINK ("+self.vulnName+") in line " + str(node.lineno))
-                self.lstTaintedSinkLines += [node.lineno,]
-                # TODO FAZER CENAS
-            return t
+            elif node.__class__.__name__ in ['Block', 'Global', 'Static',
+                                            'Finally', 'IsSet', 'Array', 'Default', ]:
+                logging.debug('testing ' + node.__class__.__name__)
+                t = False
+                for item in node.nodes:
+                    t2 = self.analyseNode(item)
+                    t = t or t2
+                return t
+            elif node.__class__.__name__ in ['Echo', 'Print', ]:
+                logging.debug('testing ' + node.__class__.__name__)
+                name = node.__class__.__name__.lower()
+                t = self.analyse(node.nodes)
+                if name in self.lstSinks and t:
+                    print("FOUND TAINTED SINK ("+self.vulnName+") in line " + str(node.lineno))
+                    self.lstTaintedSinkLines += [node.lineno,]
+                    # TODO FAZER CENAS
+                return t
+            elif node.__class__.__name__ in ['If', 'For', 'While', 'Foreach',
+                                             'TernaryOp', 'PreIncDecOp', 'PostIncDecOp']:
+                logging.debug('testing ' + node.__class__.__name__)
+                t = False
+                for field in node.fields:
+                    t2 = self.analyse(getattr(node, field))
+                    t = t or t2
+                return t
 
         if isinstance(node, Function): # function declaration
             logging.debug('testing Function')
@@ -158,27 +179,10 @@ class Analyser:
             #self.setTainted(node, t)
             return t
 
-        if isinstance(node, Array): # function declaration
-            logging.debug('testing Array')
-            print(node)
-            t = False
-            for item in node.nodes:
-                t2 = self.analyseNode(item)
-                t = t or t2
-            return t
-
         if isinstance(node, ArrayElement): # function declaration
             logging.debug('testing ArrayElement')
             return self.analyse(node.value)
 
-        if isinstance(node, If):
-            logging.debug('testing If')
-            print(node)
-            t1 = self.analyse(node.expr)
-            t2 = self.analyse(node.node)
-            t3 = self.analyse(node.elseifs)
-            t4 = self.analyse(node.else_)
-            return t1 or t2 or t3 or t4
 
         print("Not implemented: analyseNode " + str(type(node))+" in line " + str(node.lineno))
         return False
