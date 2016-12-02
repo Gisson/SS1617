@@ -1,4 +1,4 @@
-All the tests should be in the following structure:
+All the config files should be in the following structure:
 
 ```
 [rule name]
