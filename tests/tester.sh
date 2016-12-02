@@ -16,9 +16,9 @@ if [[ ! -n $(pip -V | grep "python 2") ]];then
 	python=python3
 fi
 
-echo "-------STARTING TESTS------"
+echo "`tput bold`-------STARTING TESTS------`tput sgr0`"
 for i in $(find . -name "*.php");do
-	echo "-------STARTING TEST "$i" ----------"
+	echo "`tput bold`-------STARTING TEST $i ----------`tput sgr0`"
 	$python ../src/analyzer.py $i | tee output/$(sed "s/\.php/\.out/" <<< "$i")
 done
 
