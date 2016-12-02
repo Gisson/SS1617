@@ -14,7 +14,7 @@ from collections import namedtuple
 import re
 
 DIVIDER=","
-DEFAULT_CONFIG="../example_configs/example_config.cfg"
+DEFAULT_CONFIG="../configs/default_config.cfg"
 
 def divide_and_conquer(string,division):
 	divided = string.split(division)
