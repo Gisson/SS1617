@@ -6,8 +6,8 @@ if [[ ! -d ../../phply ]];then
 	git clone --depth 1 https://github.com/viraptor/phply.git
 fi
 
-if [[ ! -n $(echo $PYTHONPATH | grep phply) ]];then
-	export PYTHONPATH="$PYTHONPATH:$(pwd)../../phply"
+if [[ -z $(echo $PYTHONPATH | grep phply) ]];then
+	export PYTHONPATH="$PYTHONPATH:$(pwd)/../../phply"
 fi
 
 mkdir -p output
