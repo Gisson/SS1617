@@ -64,7 +64,7 @@ def tryAnalyse(rule,rootNode, code):
 	else:
 		sanitizationLines = analyser.getSanitizedSinkLines()
 		for line in sanitizationLines:
-			print("> Sanitized sink for "+rule.name+" in line "+str(line)+":")
+			print("> Sanitization function for "+rule.name+" in line "+str(line)+":")
 			print(getLine(code, line))
 
 
