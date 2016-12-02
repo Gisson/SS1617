@@ -32,11 +32,11 @@ class Analyser:
 
         # list of tainted entry points
         # lstTaintedEntry[nodetype][nodeId][]
-        self.lstTaintedEntry = {'Variable': {}, 'Function': {}}
+        self.lstTaintedEntry = dict({'Variable': {}, 'Function': {}})
         # list of tainted sinks
-        self.lstTaintedSinkLines = []
+        self.lstTaintedSinkLines = list([])
         # list of sanitized sinks
-        self.lstSanitizedSinkLines = []
+        self.lstSanitizedSinkLines = list([])
         self.hasRun = False
 
     # retuns true if the node has information coming from a tainted source
@@ -53,9 +53,6 @@ class Analyser:
                     #if(self.isSink(item) and (not item in self.lstSinks)):
                     #    self.lstSinks+=[item,]
                     t2 = self.analyseNode(item)
-                    t = self.analyse
-
-
                     t = t or t2
             return t
 
@@ -78,7 +75,7 @@ class Analyser:
             logging.debug('testing Variable: ' + name)
             try:
                 tainted = self.isTainted(node)
-                logging.debug('already known: ' + name)
+                logging.debug('already known: ' + name + ": "+str(tainted))
             except KeyError:
                 logging.debug('not known: ' + name)
                 tainted = (name in self.lstEntries)
@@ -90,10 +87,10 @@ class Analyser:
             logging.debug('testing Assignment')
 
             t = self.analyse(node.expr)
-            if t:
-                # mark the left value as tainted
-                self.setTainted(node.node, t)
+            # mark the left value as (un)tainted
+            self.setTainted(node.node, t)
             # TODO: add it to the list of tainted nodes?
+            logging.debug('testing Assignment: ' + str(t))
             return t
 
         if isinstance(node, AssignOp): # aa .= bb
@@ -215,6 +212,7 @@ class Analyser:
     def setTainted(self, node, tainted):
         if isinstance(node, Variable):
             name = str(node.name)
+            logging.debug('setTainted Variable ' + name + ": " + str(tainted))
             self.lstTaintedEntry['Variable'][name] = tainted;
         elif isinstance(node, Function) or isinstance(node, FunctionCall):
             name = str(node.name)
