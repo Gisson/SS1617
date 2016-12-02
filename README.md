@@ -34,6 +34,18 @@ It should output something like:
 $hasil=mysql_query($q_sems,$koneksi);
 ```
 
+Another example:
+```bash
+
+./analyzer.py ../tests/qli_02_sanitized.php 2>/dev/null
+```
+
+Should output something like:
+```txt
+> Sanitization function for SQL injection in line 2:
+$nis=mysql_real_escape_string($nis);
+```
+
 ## Data structures
 
 The data structure used is `rule`. This structure has attributes `name` (name of the rule), `entry_point` ( a possible entry point of a vulnerability), `validation` (the validation function used for the vulnerability) and lastly a `sink` (the sink of the problem, where the vulnerability can be executed). All these attributes but the name one are lists which are all the attributes encontered in a config file which is read by the analyzer. This attributes if more than 1 are divided by commas (,). See more about config files on the examples at the [tests folder](https://github.com/Gisson/SS1617/tree/master/tests).
