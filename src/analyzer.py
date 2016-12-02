@@ -90,7 +90,7 @@ if __name__ == "__main__":
 	if code:
 		# FIXME: assuming it's php. Handle php inside HTML
 		parser = make_parser()
-		if(not code.startswith('<')):
+		if(not code.strip().startswith('<')):
 			parser.parse('<?', lexer=lexer)
 		lexer.lineno = 1
 		config=chooseConfigFile()
