@@ -75,7 +75,7 @@ if __name__ == "__main__":
 				# FIXME: read config file and stuff
 				if(len(sys.argv) > 2):
 					config_file=sys.argv[2]
-					logging.info("Using config file "+sys.arv[2])
+					logging.info("Using config file "+sys.argv[2])
 				else:
 					logging.info("No config file given, using default")
 					config_file=DEFAULT_CONFIG
