@@ -25,9 +25,9 @@ class Analyser:
     def __init__(self, vulnName, lstEntries, lstValidator, lstSinks):
         logging.debug("initializing new analiser for " + vulnName + "...")
         self.vulnName     = vulnName
-        self.lstEntries   = lstEntries
-        self.lstValidator = lstValidator
-        self.lstSinks     = lstSinks
+        self.lstEntries   = list(lstEntries)
+        self.lstValidator = list(lstValidator)
+        self.lstSinks     = list(lstSinks)
 
 
         # list of tainted entry points
@@ -89,6 +89,16 @@ class Analyser:
             # TODO: add it to the list of tainted nodes?
             return t
 
+        if isinstance(node, AssignOp): # aa .= bb
+            logging.debug('testing AssignOp')
+
+            t = self.analyse(node.right)
+            if t:
+                # mark the left value as tainted
+                self.setTainted(node.left, t)
+            # TODO: add it to the list of tainted nodes?
+            return t
+
         if isinstance(node, ArrayOffset):
             logging.debug('testing ArrayOffset')
             t1 = self.analyse(node.node)
@@ -110,12 +120,16 @@ class Analyser:
             return t1
 
         if isinstance(node, FunctionCall):
-            logging.debug('testing FunctionCall')
-            if node.name in self.lstValidator:
+            fxName = node.name
+            if isinstance(node.name, Variable): # function is a variable... $print_footer($single_lab);
+                fxName = node.name.name
+            logging.debug('testing FunctionCall ' + fxName )
+
+            if fxName in self.lstValidator:
                 logging.info("Found validation function for ("+self.vulnName+") in line " + str(node.lineno))
                 self.lstSanitizedSinkLines += [node.lineno,]
                 return False
-            elif node.name in self.lstSinks:
+            elif fxName in self.lstSinks:
                 taintedArgs = self.analyse(node.params)
                 if taintedArgs:
                     print("FOUND TAINTED SINK ("+self.vulnName+") in line " + str(node.lineno))
@@ -158,13 +172,17 @@ class Analyser:
                     # TODO FAZER CENAS
                 return t
             elif node.__class__.__name__ in ['If', 'For', 'While', 'Foreach',
-                                             'TernaryOp', 'PreIncDecOp', 'PostIncDecOp']:
+                                             'TernaryOp', 'PreIncDecOp', 'PostIncDecOp',
+                                             'ForeachVariable', 'Cast', 'Exit',]:
                 logging.debug('testing ' + node.__class__.__name__)
                 t = False
                 for field in node.fields:
                     t2 = self.analyse(getattr(node, field))
                     t = t or t2
                 return t
+
+
+        ## FIXME: need to check if declared functions are sinks. need a sink visitor
 
         if isinstance(node, Function): # function declaration
             logging.debug('testing Function')
