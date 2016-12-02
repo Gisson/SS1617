@@ -19,6 +19,6 @@ if [[ ! -n $(pip -V | grep "python 2") ]];then
 fi
 
 for i in $(find . -name "*.php");do
-	$python ../src/analyzer.py $i > output/$(sed "s/\.php/\.out/" <<< "$i")
+	$python ../src/analyzer.py $i | tee output/$(sed "s/\.php/\.out/" <<< "$i")
 done
 
