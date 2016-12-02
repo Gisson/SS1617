@@ -48,11 +48,31 @@ def readConfig(fileName):
 
 
 
+def tryAnalyse(config,rootNode):
+	analyser = Analyser(config[0].name, config[0].entry_point, config[0].validation, config[0].sink)
+	analyser.analyse(rootNode)
+	taintedLines = analyser.getTaintedSinkLines()
+	if len(taintedLines):
+		for line in taintedLines:
+			#TODO get the line content and print it
+			print("Tainted sink for "+config[0].name+" in line "+str(line)+":")
+	else:
+		sanitizationLines = analyser.getSanitizedSinkLines()
+		for line in sanitizationLines:
+			#TODO get the line content and print it
+			print("Sanitized sink for "+config[0].name+" in line "+str(line)+":")
 
 
 
-
-
+def chooseConfigFile():
+	# FIXME: read config file and stuff
+	if(len(sys.argv) > 2):
+		config_file=sys.argv[2]
+		logging.info("Using config file "+sys.argv[2])
+	else:
+		logging.info("No config file given, using default")
+		config_file=DEFAULT_CONFIG
+	return readConfig(config_file)
 
 
 
@@ -60,7 +80,6 @@ def readConfig(fileName):
 if __name__ == "__main__":
 	enableDebug()
 
-	parser = make_parser()
 
 	lexer = phplex.lexer
 
@@ -70,35 +89,16 @@ if __name__ == "__main__":
 
 	if code:
 		# FIXME: assuming it's php. Handle php inside HTML
-		parser.parse('<?', lexer=lexer)
+		parser = make_parser()
+		if(not code.startswith('<')):
+			parser.parse('<?', lexer=lexer)
+		lexer.lineno = 1
+		config=chooseConfigFile()
 		try:
-			try:
-				lexer.lineno = 1
-				rootNode = parser.parse(code, lexer=lexer)
+			rootNode = parser.parse(code, lexer=lexer)
+			tryAnalyse(config,rootNode)
+		except SyntaxError as e:
+		   print(e, 'near', repr(e.text))
 
-				# FIXME: read config file and stuff
-				if(len(sys.argv) > 2):
-					config_file=sys.argv[2]
-					logging.info("Using config file "+sys.argv[2])
-				else:
-					logging.info("No config file given, using default")
-					config_file=DEFAULT_CONFIG
-				config=readConfig(config_file)
-				analyser = Analyser(config[0].name, config[0].entry_point, config[0].validation, config[0].sink)
-				analyser.analyse(rootNode)
-				taintedLines = analyser.getTaintedSinkLines()
-				if len(taintedLines):
-					for line in taintedLines:
-						#TODO get the line content and print it
-						print("Tainted sink for "+config[0].name+" in line "+str(line)+":")
-				else:
-					sanitizationLines = analyser.getSanitizedSinkLines()
-					for line in sanitizationLines:
-						#TODO get the line content and print it
-						print("Sanitized sink for "+config[0].name+" in line "+str(line)+":")
-			except SyntaxError as e:
-			   print(e, 'near', repr(e.text))
 		except:
 			traceback.print_exc()
-
-
