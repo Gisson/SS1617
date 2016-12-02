@@ -16,11 +16,24 @@ class Analyser:
 
 
     # list of tainted sinks
-    lstTaintedSinks = []
+    lstTaintedSinkLines = []
 
     # list of sanitized sinks
-    lstSanitizedSinks = []
+    lstSanitizedSinkLines = []
 
+    hasRun = False
+
+    """ returns the line numbers of found sink functions that are tainted """
+    def getTaintedSinkLines(self):
+        if not self.hasRun:
+            raise Exception("Analyser hasn't been run")
+        return list(self.lstTaintedSinkLines)
+
+    """ returns the line numbers of found sanitization functions """
+    def getSanitizedSinkLines(self):
+        if not self.hasRun:
+            raise Exception("Analyser hasn't been run")
+        return list(self.lstSanitizedSinkLines)
 
     def __init__(self, vulnName, lstEntries, lstValidator, lstSinks):
         logging.debug("initializing new analiser for " + vulnName + "...")
@@ -31,6 +44,7 @@ class Analyser:
 
     # retuns true if the node has information coming from a tainted source
     def analyse(self, node):
+        self.hasRun = True
         if isinstance(node, Node):
             return self.analyseNode(node)
         elif isinstance(node, list):
@@ -92,12 +106,14 @@ class Analyser:
         if isinstance(node, FunctionCall):
             logging.debug('testing FunctionCall')
             if node.name in self.lstValidator:
-                # TODO: mark it as not tainted
+                logging.info("Found validation function for ("+self.vulnName+") in line " + str(node.lineno))
+                self.lstSanitizedSinkLines += [node.lineno,]
                 return False
             elif node.name in self.lstSinks:
                 taintedArgs = self.analyse(node.params)
                 if taintedArgs:
                     print("FOUND TAINTED SINK ("+self.vulnName+") in line " + str(node.lineno))
+                    self.lstTaintedSinkLines += [node.lineno,]
                     # TODO FAZER CENAS
                     return True
                 else:

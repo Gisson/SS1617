@@ -81,7 +81,17 @@ if __name__ == "__main__":
 					config_file=DEFAULT_CONFIG
 				config=readConfig(config_file)
 				analyser = Analyser(config[0].name, config[0].entry_point, config[0].validation, config[0].sink)
-				print(analyser.analyse(rootNode))
+				analyser.analyse(rootNode)
+				taintedLines = analyser.getTaintedSinkLines()
+				if len(taintedLines):
+					for line in taintedLines:
+						#TODO get the line content and print it
+						print("Tainted sink for "+config[0].name+" in line "+str(line)+":")
+				else:
+					sanitizationLines = analyser.getSanitizedSinkLines()
+					for line in sanitizationLines:
+						#TODO get the line content and print it
+						print("Sanitized sink for "+config[0].name+" in line "+str(line)+":")
 			except SyntaxError as e:
 			   print(e, 'near', repr(e.text))
 		except:
