@@ -25,14 +25,14 @@ lstSanitizedSinks = []
 tainted = []
 
 # retuns true if the node has information coming from a tainted source
-def isTaintedNode(node, lstEntries, lstValidator, lstSinks):
+def isTaintedNode(node, vulnName, lstEntries, lstValidator, lstSinks):
     if isinstance(node, Node):
-        return isNodeTainted(node, lstEntries, lstValidator, lstSinks)
+        return isNodeTainted(node, vulnName, lstEntries, lstValidator, lstSinks)
     elif isinstance(node, list):
         t = False
         for item in node:
             if isinstance(item, Node):
-                t2 = isNodeTainted(item, lstEntries, lstValidator, lstSinks)
+                t2 = isNodeTainted(item, vulnName, lstEntries, lstValidator, lstSinks)
                 t = t or t2
         return t
 
@@ -40,7 +40,7 @@ def isTaintedNode(node, lstEntries, lstValidator, lstSinks):
 
 # this is basically a badly implemented Visitor pattern because the Node
 # class just accepts visitor functions, not objects...
-def isNodeTainted(node, lstEntries, lstValidator, lstSinks):
+def isNodeTainted(node, vulnName, lstEntries, lstValidator, lstSinks):
     if isinstance(node, (str, int, float)):
         return False
 
@@ -63,7 +63,7 @@ def isNodeTainted(node, lstEntries, lstValidator, lstSinks):
 
     if isinstance(node, Assignment):
         logging.debug('testing Assignment')
-        t = isTaintedNode(node.expr, lstEntries, lstValidator, lstSinks)
+        t = isTaintedNode(node.expr, vulnName, lstEntries, lstValidator, lstSinks)
         if t:
             # mark the left value as tainted
             setTainted(node.node, t)
@@ -72,15 +72,15 @@ def isNodeTainted(node, lstEntries, lstValidator, lstSinks):
 
     if isinstance(node, ArrayOffset):
         logging.debug('testing ArrayOffset')
-        t1 = isTaintedNode(node.node, lstEntries, lstValidator, lstSinks)
-        t2 = isTaintedNode(node.expr, lstEntries, lstValidator, lstSinks)
+        t1 = isTaintedNode(node.node, vulnName, lstEntries, lstValidator, lstSinks)
+        t2 = isTaintedNode(node.expr, vulnName, lstEntries, lstValidator, lstSinks)
         # TODO: add it to the list of tainted nodes? etc
         return t1 or t2
 
     if isinstance(node, BinaryOp):
         logging.debug('testing BinaryOp')
-        t1 = isTaintedNode(node.left, lstEntries, lstValidator, lstSinks)
-        t2 = isTaintedNode(node.right, lstEntries, lstValidator, lstSinks)
+        t1 = isTaintedNode(node.left, vulnName, lstEntries, lstValidator, lstSinks)
+        t2 = isTaintedNode(node.right, vulnName, lstEntries, lstValidator, lstSinks)
         # TODO: add it to the list of tainted nodes? etc
         return t1 or t2
 
@@ -90,21 +90,21 @@ def isNodeTainted(node, lstEntries, lstValidator, lstSinks):
             # TODO: mark it as not tainted
             return False
         elif node.name in lstSinks:
-            taintedArgs = isTaintedNode(node.params, lstEntries, lstValidator, lstSinks)
+            taintedArgs = isTaintedNode(node.params, vulnName, lstEntries, lstValidator, lstSinks)
             if taintedArgs:
-                print("FOUND TAINTED SINK in line " + str(node.lineno))
+                print("FOUND TAINTED SINK ("+vulnName+") in line " + str(node.lineno))
                 # TODO FAZER CENAS
                 return True
             else:
                 return False
         else:
-            taintedArgs = isTaintedNode(node.params, lstEntries, lstValidator, lstSinks)
+            taintedArgs = isTaintedNode(node.params, vulnName, lstEntries, lstValidator, lstSinks)
             # TODO FAZER CENAS
             return taintedArgs
 
     if isinstance(node, Parameter):
         logging.debug('testing Parameter')
-        return isTaintedNode(node.node, lstEntries, lstValidator, lstSinks)
+        return isTaintedNode(node.node, vulnName, lstEntries, lstValidator, lstSinks)
 
     print("Not implemented: " + str(type(node)))
     return False
