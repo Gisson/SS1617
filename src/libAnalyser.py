@@ -139,7 +139,7 @@ class Analyser:
             elif fxName in self.lstSinks:
                 taintedArgs = self.analyse(node.params)
                 if taintedArgs:
-                    print("FOUND TAINTED SINK ("+self.vulnName+") in line " + str(node.lineno))
+                    logging.info("FOUND TAINTED SINK ("+self.vulnName+") in line " + str(node.lineno))
                     self.lstTaintedSinkLines += [node.lineno,]
                     # TODO FAZER CENAS
                     return True
@@ -174,7 +174,7 @@ class Analyser:
                 name = node.__class__.__name__.lower()
                 t = self.analyse(node.nodes)
                 if name in self.lstSinks and t:
-                    print("FOUND TAINTED SINK ("+self.vulnName+") in line " + str(node.lineno))
+                    logging.info("FOUND TAINTED SINK ("+self.vulnName+") in line " + str(node.lineno))
                     self.lstTaintedSinkLines += [node.lineno,]
                     # TODO FAZER CENAS
                 return t
@@ -245,6 +245,7 @@ class Analyser:
 
     def checkValidity(self,node):
         for n in node.nodes:
+
             if(isinstance(n,FunctionCall)):
                 if( n.name in self.lstValidator):
                     return

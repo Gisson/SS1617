@@ -48,19 +48,24 @@ def readConfig(fileName):
 
 
 
-def tryAnalyse(rule,rootNode):
+
+def getLine(code, line):
+	return code.split("\n")[line-1]
+
+
+def tryAnalyse(rule,rootNode, code):
 	analyser = Analyser(rule.name, rule.entry_point, rule.validation, rule.sink)
 	analyser.analyse(rootNode)
 	taintedLines = analyser.getTaintedSinkLines()
 	if len(taintedLines):
 		for line in taintedLines:
-			#TODO get the line content and print it
-			print("Tainted sink for "+rule.name+" in line "+str(line)+":")
+			print("> Tainted sink for "+rule.name+" in line "+str(line)+":")
+			print(getLine(code, line))
 	else:
 		sanitizationLines = analyser.getSanitizedSinkLines()
 		for line in sanitizationLines:
-			#TODO get the line content and print it
-			print("Sanitized sink for "+rule.name+" in line "+str(line)+":")
+			print("> Sanitized sink for "+rule.name+" in line "+str(line)+":")
+			print(getLine(code, line))
 
 
 
@@ -97,7 +102,7 @@ if __name__ == "__main__":
 		try:
 			rootNode = parser.parse(code, lexer=lexer)
 			for rule in config:
-				tryAnalyse(rule,rootNode)
+				tryAnalyse(rule,rootNode, code)
 		except SyntaxError as e:
 		   print(e, 'near', repr(e.text))
 
