@@ -10,9 +10,7 @@ if [[ ! -n $(echo $PYTHONPATH | grep phply) ]];then
 	export PYTHONPATH="$PYTHONPATH:$(pwd)../../phply"
 fi
 
-if [[ ! -f output ]];then
-	mkdir output
-fi
+mkdir -p output
 
 if [[ ! -n $(pip -V | grep "python 2") ]];then
 	python=python3
