@@ -8,7 +8,7 @@ from phply import phplex
 from phply.phpparse import make_parser
 from phply.phpast import *
 
-from main import *
+from libAnalyser import *
 
 from collections import namedtuple
 import re
