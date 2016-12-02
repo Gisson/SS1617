@@ -30,7 +30,10 @@ def readConfig(fileName):
 		text=f.readline()
 		while(text != ""):
 			if(text == "\n"):
-				rules+=[rule( name=ruletemp[0].strip(), entry_point=ruletemp[1].strip().split(DIVIDER), validation=ruletemp[2].strip().split(DIVIDER), sink=ruletemp[3].strip().split(DIVIDER)),]
+				if(len(ruletemp)>=4):
+					rules+=[rule( name=ruletemp[0].strip(), entry_point=ruletemp[1].strip().split(DIVIDER), validation=ruletemp[2].strip().split(DIVIDER), sink=ruletemp[3].strip().split(DIVIDER)),]
+				else:
+					text=f.readline()
 				ruletemp=[]
 				text=f.readline()
 			ruletemp+=[text,]
@@ -39,6 +42,7 @@ def readConfig(fileName):
 		f.close()
 	except IOError:
 		logging.error("File "+fileName+" not found. Please retry")
+		sys.exit("Error reading file")
 
 	return rules
 
