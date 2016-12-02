@@ -92,7 +92,7 @@ def isNodeTainted(node, lstEntries, lstValidator, lstSinks):
         elif node.name in lstSinks:
             taintedArgs = isTaintedNode(node.params, lstEntries, lstValidator, lstSinks)
             if taintedArgs:
-                print("FOUND TAINTED SINK")
+                print("FOUND TAINTED SINK in line " + str(node.lineno))
                 # TODO FAZER CENAS
                 return True
             else:
