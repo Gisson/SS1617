@@ -23,20 +23,21 @@ class Analyser:
 
 
     def __init__(self, vulnName, lstEntries, lstValidator, lstSinks):
+        logging.debug("initializing new analiser for " + vulnName + "...")
         self.vulnName     = vulnName
         self.lstEntries   = lstEntries
         self.lstValidator = lstValidator
         self.lstSinks     = lstSinks
 
     # retuns true if the node has information coming from a tainted source
-    def isTaintedNode(self, node):
+    def analyse(self, node):
         if isinstance(node, Node):
-            return self.isNodeTainted(node)
+            return self.analyseNode(node)
         elif isinstance(node, list):
             t = False
             for item in node:
                 if isinstance(item, Node):
-                    t2 = self.isNodeTainted(item)
+                    t2 = self.analyseNode(item)
                     t = t or t2
             return t
 
@@ -44,7 +45,7 @@ class Analyser:
 
     # this is basically a badly implemented Visitor pattern because the Node
     # class just accepts visitor functions, not objects...
-    def isNodeTainted(self, node):
+    def analyseNode(self, node):
         if isinstance(node, (str, int, float)):
             return False
 
@@ -67,7 +68,7 @@ class Analyser:
 
         if isinstance(node, Assignment):
             logging.debug('testing Assignment')
-            t = self.isTaintedNode(node.expr)
+            t = self.analyse(node.expr)
             if t:
                 # mark the left value as tainted
                 self.setTainted(node.node, t)
@@ -76,15 +77,15 @@ class Analyser:
 
         if isinstance(node, ArrayOffset):
             logging.debug('testing ArrayOffset')
-            t1 = self.isTaintedNode(node.node)
-            t2 = self.isTaintedNode(node.expr)
+            t1 = self.analyse(node.node)
+            t2 = self.analyse(node.expr)
             # TODO: add it to the list of tainted nodes? etc
             return t1 or t2
 
         if isinstance(node, BinaryOp):
             logging.debug('testing BinaryOp')
-            t1 = self.isTaintedNode(node.left)
-            t2 = self.isTaintedNode(node.right)
+            t1 = self.analyse(node.left)
+            t2 = self.analyse(node.right)
             # TODO: add it to the list of tainted nodes? etc
             return t1 or t2
 
@@ -94,7 +95,7 @@ class Analyser:
                 # TODO: mark it as not tainted
                 return False
             elif node.name in self.lstSinks:
-                taintedArgs = self.isTaintedNode(node.params)
+                taintedArgs = self.analyse(node.params)
                 if taintedArgs:
                     print("FOUND TAINTED SINK ("+self.vulnName+") in line " + str(node.lineno))
                     # TODO FAZER CENAS
@@ -102,13 +103,13 @@ class Analyser:
                 else:
                     return False
             else:
-                taintedArgs = self.isTaintedNode(node.params)
+                taintedArgs = self.analyse(node.params)
                 # TODO FAZER CENAS
                 return taintedArgs
 
         if isinstance(node, Parameter):
             logging.debug('testing Parameter')
-            return self.isTaintedNode(node.node)
+            return self.analyse(node.node)
 
         print("Not implemented: " + str(type(node)))
         return False

@@ -81,7 +81,7 @@ if __name__ == "__main__":
 					config_file=DEFAULT_CONFIG
 				config=readConfig(config_file)
 				analyser = Analyser(config[0].name, config[0].entry_point, config[0].validation, config[0].sink)
-				print(analyser.isTaintedNode(rootNode))
+				print(analyser.analyse(rootNode))
 			except SyntaxError as e:
 			   print(e, 'near', repr(e.text))
 		except:
