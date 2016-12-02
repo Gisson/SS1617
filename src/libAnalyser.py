@@ -48,7 +48,14 @@ class Analyser:
             t = False
             for item in node:
                 if isinstance(item, Node):
+                    if isinstance(item, Function):
+                        self.checkValidity(item)
+                    #if(self.isSink(item) and (not item in self.lstSinks)):
+                    #    self.lstSinks+=[item,]
                     t2 = self.analyseNode(item)
+                    t = self.analyse
+
+
                     t = t or t2
             return t
 
@@ -225,7 +232,27 @@ class Analyser:
         else:
             print("Not implemented: isTainted " + str(type(node))+" in line " + str(node.lineno))
 
+    def isSink(self,node):
+        if isinstance(node, FunctionCall):
+            logging.debug(node.name in self.lstSinks)
+            return node.name in self.lstSinks
+        elif isinstance(node, Function):
+            checkValidity(node)
+        elif isinstance(node, Assignment):
+            return self.isSink(node.expr)
+        else:
+            return False
 
+    def checkValidity(self,node):
+        for n in node.nodes:
+            if(isinstance(n,FunctionCall)):
+                if( n.name in self.lstValidator):
+                    return
+            if(isinstance(n,Assignment)):
+                if( n.expr.name in self.lstValidator):
+                    return
+            if( self.isSink(n)):
+                logging.debug("found sink function2 "+node.name)
+                self.lstSinks+=[node.name,]
 
-
-
+                return
