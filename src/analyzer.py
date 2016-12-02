@@ -80,7 +80,8 @@ if __name__ == "__main__":
 					logging.info("No config file given, using default")
 					config_file=DEFAULT_CONFIG
 				config=readConfig(config_file)
-				print(isTaintedNode(rootNode, config[0].name, config[0].entry_point, config[0].validation,config[0].sink))
+				analyser = Analyser(config[0].name, config[0].entry_point, config[0].validation, config[0].sink)
+				print(analyser.isTaintedNode(rootNode))
 			except SyntaxError as e:
 			   print(e, 'near', repr(e.text))
 		except:
