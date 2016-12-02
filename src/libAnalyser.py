@@ -248,7 +248,7 @@ class Analyser:
             if(isinstance(n,FunctionCall)):
                 if( n.name in self.lstValidator):
                     return
-            if(isinstance(n,Assignment)):
+            if(isinstance(n,Assignment) and hasattr(n.expr,"name")):
                 if( n.expr.name in self.lstValidator):
                     return
             if( self.isSink(n)):
