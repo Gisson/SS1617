@@ -48,19 +48,19 @@ def readConfig(fileName):
 
 
 
-def tryAnalyse(config,rootNode):
-	analyser = Analyser(config[0].name, config[0].entry_point, config[0].validation, config[0].sink)
+def tryAnalyse(rule,rootNode):
+	analyser = Analyser(rule.name, rule.entry_point, rule.validation, rule.sink)
 	analyser.analyse(rootNode)
 	taintedLines = analyser.getTaintedSinkLines()
 	if len(taintedLines):
 		for line in taintedLines:
 			#TODO get the line content and print it
-			print("Tainted sink for "+config[0].name+" in line "+str(line)+":")
+			print("Tainted sink for "+rule.name+" in line "+str(line)+":")
 	else:
 		sanitizationLines = analyser.getSanitizedSinkLines()
 		for line in sanitizationLines:
 			#TODO get the line content and print it
-			print("Sanitized sink for "+config[0].name+" in line "+str(line)+":")
+			print("Sanitized sink for "+rule.name+" in line "+str(line)+":")
 
 
 
@@ -96,7 +96,8 @@ if __name__ == "__main__":
 		config=chooseConfigFile()
 		try:
 			rootNode = parser.parse(code, lexer=lexer)
-			tryAnalyse(config,rootNode)
+			for rule in config:
+				tryAnalyse(rule,rootNode)
 		except SyntaxError as e:
 		   print(e, 'near', repr(e.text))
 
