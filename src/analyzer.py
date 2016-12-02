@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import sys
 
 import ast
@@ -14,6 +14,7 @@ from collections import namedtuple
 import re
 
 DIVIDER=","
+DEFAULT_CONFIG="../example_configs/example_config.cfg"
 
 def divide_and_conquer(string,division):
 	divided = string.split(division)
@@ -37,7 +38,7 @@ def readConfig(fileName):
 		rules+=[rule( name=ruletemp[0].strip(), entry_point=ruletemp[1].strip().split(DIVIDER), validation=ruletemp[2].strip().split(DIVIDER), sink=ruletemp[3].strip().split(DIVIDER)),]
 		f.close()
 	except IOError:
-		print("File not found!!!!")
+		logging.error("File "+fileName+" not found. Please retry")
 
 	return rules
 
@@ -72,7 +73,14 @@ if __name__ == "__main__":
 				rootNode = parser.parse(code, lexer=lexer)
 
 				# FIXME: read config file and stuff
-				print isTaintedNode(rootNode, ['$_POST',], ['mysql_escape_string',], ['mysql_query',])
+				if(len(sys.argv) > 2):
+					config_file=sys.argv[2]
+					logging.info("Using config file "+sys.arv[2])
+				else:
+					logging.info("No config file given, using default")
+					config_file=DEFAULT_CONFIG
+				config=readConfig(config_file)
+				print(isTaintedNode(rootNode, config[0].name, config[0].entry_point, config[0].validation,config[0].sink))
 			except SyntaxError as e:
 			   print(e, 'near', repr(e.text))
 		except:
