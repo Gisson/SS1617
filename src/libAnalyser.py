@@ -123,7 +123,12 @@ class Analyser:
             # TODO: add it to the list of tainted nodes? etc
             return t1
 
-        if isinstance(node, FunctionCall):
+        if isinstance(node, Silence):
+            logging.debug('testing Silence')
+            t1 = self.analyse(node.expr)
+            return t1
+
+        if isinstance(node, FunctionCall) or isinstance(node, MethodCall):
             fxName = node.name
             if isinstance(node.name, Variable): # function is a variable... $print_footer($single_lab);
                 fxName = node.name.name
@@ -214,7 +219,7 @@ class Analyser:
             name = str(node.name)
             logging.debug('setTainted Variable ' + name + ": " + str(tainted))
             self.lstTaintedEntry['Variable'][name] = tainted;
-        elif isinstance(node, Function) or isinstance(node, FunctionCall):
+        elif isinstance(node, Function) or isinstance(node, FunctionCall) or isinstance(node, MethodCall):
             name = str(node.name)
             self.lstTaintedEntry['Function'][name] = tainted;
         else:
@@ -224,7 +229,7 @@ class Analyser:
         if isinstance(node, Variable):
             name = str(node.name)
             return self.lstTaintedEntry['Variable'][name]
-        elif isinstance(node, Function) or isinstance(node, FunctionCall):
+        elif isinstance(node, Function) or isinstance(node, FunctionCall) or isinstance(node, MethodCall):
             name = str(node.name)
             return self.lstTaintedEntry['Function'][name]
         else:
