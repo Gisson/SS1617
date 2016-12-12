@@ -188,6 +188,11 @@ class Analyser:
                 for field in node.fields:
                     t2 = self.analyse(getattr(node, field))
                     t = t or t2
+                if node.__class__.__name__ == "Exit":
+                    if "die" in self.lstSinks and t:
+                        logging.info("FOUND TAINTED SINK ("+self.vulnName+") in line " + str(node.lineno))
+                        self.lstTaintedSinkLines += [node.lineno,]
+                        # TODO FAZER CENAS
                 return t
 
 
